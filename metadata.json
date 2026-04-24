@@ -1,0 +1,10 @@
+{
+  "name": "Aura Fragrances",
+  "description": "A high-end, luxury e-commerce experience for niche and designer perfumes.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "Ecommerce",
+    "Luxury UI",
+    "Fragrance Quiz"
+  ]
+}
