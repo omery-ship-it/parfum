@@ -596,6 +596,41 @@ export default function App() {
     setCartToast(`SİPARİŞ DURUMU: ${newStatus.toUpperCase()}`);
   };
 
+  const getCartProgressMessage = () => {
+    if (cartCount === 0) return "Fırsatları kaçırmak üzeresin! Sepetine ürün ekle.";
+    if (cartCount === 1) return "🔥 3 AL 1 ÖDE fırsatına sadece 2 ürün kaldı!";
+    if (cartCount === 2) return "🚨 Son 1 ürün! Ekleyerek SONRAKİ ÜRÜNÜ BEDAVA kazan!";
+    return "🎉 TEBRİKLER! 3 Al 1 Öde (1 Ürün Bedava) kazandınız!";
+  };
+  const cartProgressPercentage = Math.min((cartCount / 3) * 100, 100);
+
+  // Fake social proof notification state
+  const [socialProof, setSocialProof] = useState<{name: string, location: string, product: string, time: string} | null>(null);
+
+  useEffect(() => {
+    const notifications = [
+      { name: 'Ali', location: 'İstanbul', product: 'Sauvage', time: '1 dakika önce' },
+      { name: 'Ayşe', location: 'Ankara', product: 'Paradoxe', time: 'Şimdi' },
+      { name: 'Mehmet', location: 'İzmir', product: 'L.12.12 Noir', time: '2 dakika önce' },
+      { name: 'Selin', location: 'Bursa', product: 'Stronger With You', time: 'Şimdi' },
+      { name: 'Kerem', location: 'Antalya', product: 'Born In Roma', time: '5 dakika önce' }
+    ];
+
+    const showRandomNotification = () => {
+      const idx = Math.floor(Math.random() * notifications.length);
+      setSocialProof(notifications[idx]);
+      setTimeout(() => setSocialProof(null), 5000); // Hide after 5 seconds
+    };
+
+    const interval = setInterval(() => {
+      if (Math.random() > 0.4) showRandomNotification();
+    }, 12000); // Check every 12 seconds
+    
+    setTimeout(() => showRandomNotification(), 3000); // Initial fast notification
+    
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="min-h-screen selection:bg-accent/30 font-sans bg-bone text-ink">
       {/* --- Search Overlay --- */}
@@ -683,12 +718,12 @@ export default function App() {
       </AnimatePresence>
 
       {/* Announcement Bar */}
-      <div className="bg-ink text-[10px] md:text-xs uppercase tracking-[0.3em] font-bold py-3 text-center text-bone flex items-center justify-center gap-4 px-4 z-[60]">
-        <span className="hidden md:inline">🔥 FIRSATIN BİTMESİNE:</span>
-        <span className="text-gold font-mono text-base md:text-lg tracking-normal">{formatTime(timeLeft)}</span>
+      <div className="bg-red-600 text-[10px] md:text-xs uppercase tracking-[0.3em] font-black py-3 md:py-4 text-center text-white flex items-center justify-center gap-4 px-4 z-[60] shadow-md">
+        <span className="hidden md:inline">🔥 SON FIRSATIN BİTMESİNE:</span>
+        <span className="text-white font-mono text-base md:text-xl tracking-wider animate-pulse drop-shadow-md">{formatTime(timeLeft)}</span>
         <span className="hidden md:inline">🔥</span>
-        <div className="mx-4 h-4 w-px bg-bone/20 hidden md:block" />
-        <span className="hidden md:inline">3 AL 1 ÖDE | A++ Kaliteli Kalıcı Parfümler</span>
+        <div className="mx-4 h-4 w-px bg-white/30 hidden md:block" />
+        <span className="inline-block skew-x-[-10deg]"><span className="skew-x-[10deg] block">TÜM ÜRÜNLERDE <span className="text-yellow-300">3 AL 1 ÖDE!</span></span></span>
       </div>
 
       {/* --- Header --- */}
@@ -932,6 +967,17 @@ export default function App() {
 
               {cart.length > 0 && (
                 <div className="p-8 bg-bone/50 border-t border-ink/5">
+                  <div className="mb-6 space-y-3">
+                    <p className="text-[10px] uppercase tracking-widest font-bold text-ink/80 text-center">
+                      {getCartProgressMessage()}
+                    </p>
+                    <div className="h-1.5 w-full bg-ink/10 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-red-600 transition-all duration-1000 ease-out"
+                        style={{ width: `${cartProgressPercentage}%` }}
+                      />
+                    </div>
+                  </div>
                   <div className="flex justify-between mb-8">
                     <span className="text-xs tracking-widest font-bold opacity-60">TOPLAM</span>
                     <span className="text-2xl font-bold tracking-tighter">₺ {cartTotal.toLocaleString()}</span>
@@ -1553,7 +1599,7 @@ export default function App() {
             <div className="flex items-end justify-between mb-16 px-4">
               <div>
                 <h2 className="text-4xl md:text-5xl font-sans font-extralight uppercase mb-4 tracking-tighter">
-                  {activeCategory === 'Erkek' ? 'Erkek Koleksiyonu' : activeCategory === 'Kadın' ? 'Kadın Koleksiyonu' : 'Tüm Ürünler'}
+                  {activeCategory === 'deals' ? <span className="text-red-600 font-bold">🔥 GÜNÜN FIRSATLARI</span> : activeCategory === 'Erkek' ? 'Erkek Koleksiyonu' : activeCategory === 'Kadın' ? 'Kadın Koleksiyonu' : 'Tüm Ürünler'}
                 </h2>
                 <p className="text-accent uppercase letter-spacing-wide text-[11px] font-bold">Özenle Seçilmiş Parfümler</p>
               </div>
@@ -1720,6 +1766,37 @@ export default function App() {
           </div>
         </section>
 
+        {/* --- Customer Reviews --- */}
+        <section className="py-24 bg-[#FBFBFB] border-t border-ink/5">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="text-center mb-16">
+              <h2 className="text-sm md:text-base tracking-[0.4em] font-black uppercase mb-4 inline-block relative">
+                MÜŞTERİ YORUMLARI
+                <span className="absolute -bottom-2 lg:-bottom-4 left-0 right-0 h-0.5 bg-red-600 w-1/3 mx-auto"></span>
+              </h2>
+              <p className="text-xs tracking-widest uppercase opacity-50 mt-8">Gerçek deneyimler, benzersiz yorumlar</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                { name: 'Kerem T.', product: 'Sauvage', comment: 'Kalıcılığı gerçekten efsane. 3 Al 1 Öde fırsatıyla stok yaptım, ertesi gün elime ulaştı. Satıcıya teşekkürler.', rating: 5 },
+                { name: 'Merve S.', product: 'Paradoxe', comment: 'Kokusu harika ve kesinlikle orijinal olduğunu hissettiriyor. Çevremdeki herkes sormaya başladı. Hızlı kargo için ayrı teşekkürler.', rating: 5 },
+                { name: 'Burak M.', product: 'Stronger With You', comment: 'İlk defa bu mağazadan aldım, paketlemesi bile ne kadar kaliteli olduklarını gösteriyor. Arkadaşlarıma da tavsiye ettim.', rating: 5 }
+              ].map((review, idx) => (
+                <div key={idx} className="bg-white p-8 luxury-shadow border border-ink/5 relative group cursor-default">
+                  <div className="flex gap-1 mb-4">
+                    {[1,2,3,4,5].map(star => <Star key={star} size={12} className="text-gold fill-gold" />)}
+                  </div>
+                  <p className="text-sm font-medium italic mb-6">"{review.comment}"</p>
+                  <div className="flex justify-between items-center mt-auto border-t border-ink/10 pt-4">
+                    <span className="text-[10px] font-bold tracking-widest uppercase">{review.name}</span>
+                    <span className="text-[9px] uppercase tracking-widest text-red-600 font-bold bg-red-50 py-1 px-2">{review.product}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* --- Bilgilendirme Section --- */}
         <section className="bg-ink text-bone py-16 px-6">
           <div className="max-w-4xl mx-auto text-center">
@@ -1817,7 +1894,7 @@ export default function App() {
         href="https://wa.me/1234567890" 
         target="_blank" 
         rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-[100] w-14 h-14 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-2xl hover:bg-emerald-600 transition-all hover:scale-110 active:scale-95 group"
+        className="fixed bottom-24 lg:bottom-6 right-6 z-[90] w-14 h-14 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-2xl hover:bg-emerald-600 transition-all hover:scale-110 active:scale-95 group"
       >
         <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
           <path d="M17.472 14.382c-.022-.014-.503-.245-.582-.273-.08-.027-.138-.04-.197.048-.058.088-.227.288-.278.345-.05.058-.102.065-.19.022a3.607 3.607 0 0 1-1.203-.741c-.469-.418-.787-.935-.879-1.092-.092-.157-.01-.242.068-.32.071-.07.157-.184.236-.276.08-.092.106-.157.158-.261.05-.106.026-.197-.013-.276-.04-.078-.197-.478-.27-.654-.07-.17-.142-.147-.197-.15-.05-.002-.108-.003-.166-.003-.058 0-.153.022-.234.108-.08.088-.307.3-.307.733 0 .433.315.852.359.91.044.057.621.948 1.503 1.33.21.09.373.144.501.185.21.066.402.057.553.035.168-.025.518-.212.591-.417.073-.205.073-.38.05-.417-.022-.037-.08-.058-.17-.1l-.001-.001z"></path>
@@ -1826,6 +1903,51 @@ export default function App() {
           Müşteri Desteği
         </span>
       </a>
+
+      {/* --- Social Proof Notification --- */}
+      <AnimatePresence>
+        {socialProof && (
+          <motion.div
+            initial={{ opacity: 0, x: -50, y: 50 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            exit={{ opacity: 0, x: -50, scale: 0.9 }}
+            className="fixed bottom-24 lg:bottom-10 left-6 z-[100] bg-white text-ink p-4 shadow-2xl border border-ink/10 flex items-center gap-4 max-w-xs"
+          >
+            <div className="w-12 h-16 bg-bone overflow-hidden flex-shrink-0">
+              <img src={SIGNATURE_IMAGE} alt="product" className="w-full h-full object-cover mix-blend-multiply" />
+            </div>
+            <div>
+              <p className="text-[10px] uppercase font-bold tracking-widest text-ink mb-1">{socialProof.name}, {socialProof.location}</p>
+              <p className="text-[11px] font-medium leading-tight">Bir <span className="font-bold text-red-600 uppercase">{socialProof.product}</span> satın aldı!</p>
+              <p className="text-[9px] uppercase tracking-widest opacity-50 mt-1">{socialProof.time}</p>
+            </div>
+            <div className="absolute -top-2 -right-2 bg-red-600 text-white p-1 rounded-full animate-bounce">
+              <ShoppingBag size={10} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* --- Mobile Sticky Opportunities Bottom Bar --- */}
+      <div className="fixed bottom-0 left-0 right-0 z-[80] md:hidden bg-white border-t border-ink/10 flex items-stretch h-16 shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
+        <button 
+          onClick={() => setIsSearchOpen(true)}
+          className="flex-1 flex flex-col items-center justify-center border-r border-ink/10 text-ink hover:bg-bone transition-colors"
+        >
+          <Search size={20} className="mb-1" />
+          <span className="text-[8px] font-bold tracking-widest uppercase">Koku Bul</span>
+        </button>
+        <button 
+          onClick={() => {
+            setActiveCategory('deals');
+            document.getElementById('all-products')?.scrollIntoView({ behavior: 'smooth' });
+          }}
+          className="flex-[2] bg-red-600 text-white flex flex-col items-center justify-center relative overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-red-700 animate-pulse opacity-50"></div>
+          <span className="text-[11px] font-black tracking-[0.2em] uppercase relative z-10">TÜM FIRSATLAR 🔥</span>
+        </button>
+      </div>
 
       {/* --- Toast Notification --- */}
       <AnimatePresence>
